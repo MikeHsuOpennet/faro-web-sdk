@@ -67,6 +67,7 @@ services:
       - '${AGENT_PORT}:${AGENT_PORT}'
       - '${AGENT_PORT_APP_RECEIVER}:${AGENT_PORT_APP_RECEIVER}'
       - '${TEMPO_PORT_OTLP_RECEIVER}:${TEMPO_PORT_OTLP_RECEIVER}'
+      - '${TEMPO_PORT_HTTP_RECEIVER}:${TEMPO_PORT_HTTP_RECEIVER}'
     depends_on:
       - 'mimir'
       - 'grafana'

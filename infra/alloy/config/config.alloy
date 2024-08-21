@@ -19,11 +19,21 @@ loki.process "logs_process_client" {
   forward_to = [loki.write.logs_write_client.receiver]
 
   stage.logfmt {
-      mapping = { "kind" = "", "service_name" = "", "app" = "" }
+    mapping = {
+      "app" = "app_name",
+      "version" = "app_version",
+      "enviroment" = "app_environment",
+      "kind" = "",
+    }
   }
 
   stage.labels {
-      values = { "kind" = "kind", "service_name" = "service_name", "app" = "app" }
+    values = {
+      app  = "",
+      version = "",
+      enviroment = "",
+      kind = "",
+    }
   }
 }
 
@@ -63,11 +73,6 @@ logging {
 }
 
 faro.receiver "integrations_app_agent_receiver" {
-	extra_log_labels = {
-		app  = env("DEMO_CLIENT_PACKAGE_NAME"),
-		kind = "",
-	}
-
 	server {
 		listen_address           = "0.0.0.0"
 		listen_port              = env("AGENT_PORT_APP_RECEIVER")
@@ -92,14 +97,22 @@ otelcol.receiver.otlp "default" {
 	grpc {
 		include_metadata = true
 	}
+	http {
+        include_metadata = true
+	}
 
 	output {
 		metrics = []
-		logs    = []
+		logs    = [otelcol.exporter.otlphttp.log_write.input]
 		traces  = [otelcol.exporter.otlp.trace_write.input]
 	}
 }
 
+otelcol.exporter.otlphttp "log_write" {
+  client {
+    endpoint = format("http://%s:%s/otlp", env("LOKI_HOST"), env("LOKI_PORT"))
+  }
+}
 
 otelcol.exporter.otlp "trace_write" {
 	retry_on_failure {
