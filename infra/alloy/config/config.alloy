@@ -69,7 +69,7 @@ loki.write "logs_write_server" {
 }
 
 logging {
-	level = "info"
+	level = "debug"
 }
 
 faro.receiver "integrations_app_agent_receiver" {
